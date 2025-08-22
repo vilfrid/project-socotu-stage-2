@@ -1,0 +1,6 @@
+db-data/
+odoo-web-data/
+__pycache__/
+*.pyc
+*.log
+config/odoo.conf
