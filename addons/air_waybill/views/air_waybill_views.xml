@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- List View -->
+    <!-- List View (formerly Tree View) -->
     <record id="view_air_waybill_list" model="ir.ui.view">
         <field name="name">air.waybill.list</field>
         <field name="model">air.waybill</field>
@@ -12,6 +12,8 @@
                 <field name="shipper_id"/>
                 <field name="consignee_id"/>
                 <field name="gross_weight"/>
+                <field name="volume"/>
+                <field name="iata_code"/>
                 <field name="state"/>
             </list>
         </field>
@@ -21,19 +23,16 @@
     <record id="view_air_waybill_form" model="ir.ui.view">
         <field name="name">air.waybill.form</field>
         <field name="model">air.waybill</field>
+        <field name="type">form</field>
         <field name="arch" type="xml">
             <form string="Air Waybill">
                 <header>
                     <field name="state" widget="statusbar"/>
                 </header>
                 <sheet>
-                    <div class="oe_title">
-                        <h1>
-                            <field name="name" placeholder="LTA Number"/>
-                        </h1>
-                    </div>
                     <group>
                         <group>
+                            <field name="name"/>
                             <field name="date"/>
                             <field name="shipper_id"/>
                             <field name="shipper_address"/>
@@ -45,22 +44,25 @@
                             <field name="departure"/>
                             <field name="destination"/>
                             <field name="currency_id"/>
+                            <field name="iata_code"/>
                         </group>
                     </group>
                     <notebook>
                         <page string="Cargo Information">
                             <group>
-                                <group>
-                                    <field name="gross_weight"/>
-                                    <field name="chargeable_weight"/>
-                                    <field name="pieces"/>
-                                </group>
-                                <group>
-                                    <field name="purchase_amount"/>
-                                    <field name="sale_amount"/>
-                                </group>
+                                <field name="gross_weight"/>
+                                <field name="chargeable_weight"/>
+                                <field name="pieces"/>
+                                <field name="length"/>
+                                <field name="width"/>
+                                <field name="height"/>
+                                <field name="volume" readonly="1"/>
                             </group>
-                            <group string="Additional Information">
+                        </page>
+                        <page string="Financial &amp; Additional Info">
+                            <group>
+                                <field name="purchase_amount"/>
+                                <field name="sale_amount"/>
                                 <field name="handling_info"/>
                                 <field name="description"/>
                             </group>
@@ -75,33 +77,4 @@
             </form>
         </field>
     </record>
-
-    <!-- Search View -->
-    <record id="view_air_waybill_search" model="ir.ui.view">
-        <field name="name">air.waybill.search</field>
-        <field name="model">air.waybill</field>
-        <field name="arch" type="xml">
-            <search string="Search Air Waybill">
-                <field name="name"/>
-                <field name="shipper_id"/>
-                <field name="consignee_id"/>
-                <field name="flight_number"/>
-                <filter string="Draft" name="draft" domain="[('state','=','draft')]"/>
-                <filter string="In Transit" name="in_transit" domain="[('state','=','in_transit')]"/>
-                <filter string="Delivered" name="delivered" domain="[('state','=','delivered')]"/>
-            </search>
-        </field>
-    </record>
-
-    <!-- Action -->
-    <record id="action_air_waybill" model="ir.actions.act_window">
-        <field name="name">Air Waybills</field>
-        <field name="res_model">air.waybill</field>
-        <field name="view_mode">list,form</field>
-        <field name="view_id" ref="view_air_waybill_list"/>
-    </record>
-
-    <!-- Menu -->
-    <menuitem id="menu_air_waybill_root" name="Air Waybill"/>
-    <menuitem id="menu_air_waybill" parent="menu_air_waybill_root" action="action_air_waybill" name="Air Waybills"/>
 </odoo>

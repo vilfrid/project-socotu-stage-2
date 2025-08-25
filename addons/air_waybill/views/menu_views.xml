@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Actions -->
+    <!-- Action -->
     <record id="action_air_waybill" model="ir.actions.act_window">
         <field name="name">Air Waybills</field>
         <field name="res_model">air.waybill</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_id" ref="view_air_waybill_list"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Create your first Air Waybill!
@@ -12,14 +13,8 @@
         </field>
     </record>
 
-    <!-- Menus -->
-    <menuitem id="menu_air_waybill_root"
-        name="Air Waybills"
-        sequence="10"/>
-
-    <menuitem id="menu_air_waybill_main"
-        name="Air Waybills"
-        parent="menu_air_waybill_root"
-        action="action_air_waybill"
-        sequence="1"/>
+    <!-- Menu -->
+    <menuitem id="menu_air_waybill_root" name="Air Waybills" sequence="10"/>
+    <menuitem id="menu_air_waybill_main" parent="menu_air_waybill_root"
+        action="action_air_waybill" name="Air Waybills" sequence="1"/>
 </odoo>
