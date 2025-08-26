@@ -1,0 +1,19 @@
+/* Hidden column */
+.o_hidden_column {
+    display: none !important;
+}
+
+/* Button styles */
+.btn-warning {
+    background-color: orange !important;
+    color: white !important;
+}
+
+.btn-success {
+    background-color: green !important;
+    color: white !important;
+}
+.btn-primary.toggled {
+    background-color: green !important;
+    color: white !important;
+}

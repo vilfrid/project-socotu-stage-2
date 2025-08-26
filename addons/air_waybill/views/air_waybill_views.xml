@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- List View (formerly Tree View) -->
+    <!-- List view -->
     <record id="view_air_waybill_list" model="ir.ui.view">
         <field name="name">air.waybill.list</field>
         <field name="model">air.waybill</field>
-        <field name="type">list</field>
         <field name="arch" type="xml">
             <list string="Air Waybill">
                 <field name="name"/>
@@ -19,7 +18,7 @@
         </field>
     </record>
 
-    <!-- Form View -->
+    <!-- Form view -->
     <record id="view_air_waybill_form" model="ir.ui.view">
         <field name="name">air.waybill.form</field>
         <field name="model">air.waybill</field>
@@ -28,6 +27,10 @@
             <form string="Air Waybill">
                 <header>
                     <field name="state" widget="statusbar"/>
+                    <button name="action_toggle_column_2"
+                            type="object"
+                            string="LTA Soustraite"
+                            class="btn-primary"/>
                 </header>
                 <sheet>
                     <group>
@@ -57,24 +60,34 @@
                                 <field name="width"/>
                                 <field name="height"/>
                                 <field name="volume" readonly="1"/>
+                                <field name="handling_info"/>
                             </group>
                         </page>
                         <page string="Financial &amp; Additional Info">
                             <group>
                                 <field name="purchase_amount"/>
                                 <field name="sale_amount"/>
-                                <field name="handling_info"/>
                                 <field name="description"/>
+                            </group>
+                            <group>
+                                <field name="financial_line_ids">
+                                    <list editable="bottom">
+                                        <field name="column_1"/>
+                                        <field name="column_2" attrs="{'invisible':[('hide_column_2','=',True)]}"/>
+
+                                        <field name="column_3"/>
+                                        <field name="column_4"/>
+                                        <field name="column_5"/>
+                                    </list>
+                                </field>
                             </group>
                         </page>
                     </notebook>
                 </sheet>
-                <div class="oe_chatter">
-                    <field name="message_follower_ids"/>
-                    <field name="activity_ids"/>
-                    <field name="message_ids"/>
-                </div>
             </form>
         </field>
     </record>
+
+    <!-- Assets -->
+
 </odoo>

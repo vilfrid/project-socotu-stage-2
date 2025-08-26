@@ -1,22 +1,26 @@
+# -*- coding: utf-8 -*-
 {
-    'name': 'Air Waybill Management',
+    'name': 'Air Waybill',
     'version': '1.0',
-    'category': 'Sales',
-    'summary': 'Manage Air Waybills (LTA)',
+    'summary': 'Air Waybill Management with Financial Lines',
     'description': """
-        This module allows you to manage Air Waybills (LTA) with the following features:
-        - Create and store air waybills
-        - Track shipment details
-        - Manage handling information
-        - Record financial details
+        Module to manage Air Waybills with financial lines and toggle columns in the list view.
     """,
-    'depends': ['sale', 'base'],
+    'author': 'Your Name',
+    'category': 'Operations',
+    'depends': ['base', 'mail', 'sale', 'web'],  # add any other dependencies
     'data': [
         'security/ir.model.access.csv',
         'views/air_waybill_views.xml',
-        'views/menu_views.xml',
+        'views/menu_views.xml',  # <-- Add this line
     ],
+    'assets': {
+        'web.assets_backend': [
+            'air_waybill/static/src/js/financial_column_toggle.js',
+            'air_waybill/static/src/css/financial_column_toggle.css',
+        ],
+    },
     'installable': True,
     'application': True,
-    'auto_install': False,
+    'license': 'LGPL-3',
 }
