@@ -16,7 +16,6 @@
     ],
     'assets': {
         'web.assets_backend': [
-            'air_waybill/static/src/js/financial_column_toggle.js',
             'air_waybill/static/src/css/financial_column_toggle.css',
         ],
     },

@@ -73,7 +73,7 @@
                                 <field name="financial_line_ids">
                                     <list editable="bottom">
                                         <field name="column_1"/>
-                                        <field name="column_2" attrs="{'invisible':[('hide_column_2','=',True)]}"/>
+                                        <field name="column_2" attrs="{'invisible': [('parent.hide_column_2', '=', True)]}"/>
 
                                         <field name="column_3"/>
                                         <field name="column_4"/>
@@ -89,5 +89,9 @@
     </record>
 
     <!-- Assets -->
-
+    <template id="assets_backend" inherit_id="web.assets_backend">
+        <xpath expr="." position="inside">
+            <script type="module" src="/air_waybill/static/src/js/financial_column_toggle.js"/>
+        </xpath>
+    </template>
 </odoo>

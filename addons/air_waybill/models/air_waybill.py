@@ -52,7 +52,7 @@ class AirWaybill(models.Model):
     def action_toggle_column_2(self):
         for rec in self:
             rec.write({'hide_column_2': not rec.hide_column_2})
-            return {'type': 'ir.actions.client', 'tag': 'reload'}
+        return {'type': 'ir.actions.client', 'tag': 'reload'}
 
 
 
