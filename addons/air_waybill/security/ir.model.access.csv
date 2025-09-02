@@ -1,5 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_air_waybill_user,air.waybill.user,model_air_waybill,sales_team.group_sale_salesman,1,1,1,0
-access_air_waybill_manager,air.waybill.manager,model_air_waybill,sales_team.group_sale_manager,1,1,1,1
-access_air_waybill_line_user,air.waybill.line.user,model_air_waybill_line,sales_team.group_sale_salesman,1,1,1,0
-access_air_waybill_line_manager,air.waybill.line.manager,model_air_waybill_line,sales_team.group_sale_manager,1,1,1,1
+access_air_waybill_user,air.waybill.user,model_air_waybill,base.group_system,1,1,1,1
+access_air_waybill_manager,air.waybill.manager,model_air_waybill,base.group_system,1,1,1,1
+access_air_waybill_line_user,air.waybill.line.user,model_air_waybill_line,base.group_system,1,1,1,1
+access_air_waybill_line_manager,air.waybill.line.manager,model_air_waybill_line,base.group_system,1,1,1,1

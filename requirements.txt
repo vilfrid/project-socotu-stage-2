@@ -1,0 +1,2 @@
+# Add any python libraries required by your custom addons
+requests

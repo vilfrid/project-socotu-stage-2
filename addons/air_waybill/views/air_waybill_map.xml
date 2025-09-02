@@ -1,0 +1,26 @@
+<odoo>
+    <template id="air_waybill.map" name="Air Waybill Map">
+        <t t-if="record.flight_legs">
+            <div id="map" style="height: 400px;"></div>
+            <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+            <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+            <script>
+                var map = L.map('map').setView([20,0], 2);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: 'Map data © OpenStreetMap contributors'
+                }).addTo(map);
+
+                var flight_legs = JSON.parse('<t t-esc="record.flight_legs"/>');
+                flight_legs.forEach(function(leg){
+                    if(leg.originCoord && leg.destinationCoord){
+                        var origin = leg.originCoord.split(',');
+                        var dest = leg.destinationCoord.split(',');
+                        L.polyline([[parseFloat(origin[0]), parseFloat(origin[1])], [parseFloat(dest[0]), parseFloat(dest[1])]], {color: 'blue'}).addTo(map);
+                        L.marker([parseFloat(origin[0]), parseFloat(origin[1])]).addTo(map).bindPopup('Origin: '+leg.number);
+                        L.marker([parseFloat(dest[0]), parseFloat(dest[1])]).addTo(map).bindPopup('Destination: '+leg.number);
+                    }
+                });
+            </script>
+        </t>
+    </template>
+</odoo>

@@ -22,15 +22,13 @@
     <record id="view_air_waybill_form" model="ir.ui.view">
         <field name="name">air.waybill.form</field>
         <field name="model">air.waybill</field>
-        <field name="type">form</field>
         <field name="arch" type="xml">
             <form string="Air Waybill">
                 <header>
+
+                    <button name="action_track_awb" string="Track" type="object" class="btn-primary"/>
+
                     <field name="state" widget="statusbar"/>
-                    <button name="action_toggle_column_2"
-                            type="object"
-                            string="LTA Soustraite"
-                            class="btn-primary"/>
                 </header>
                 <sheet>
                     <group>
@@ -63,31 +61,30 @@
                                 <field name="handling_info"/>
                             </group>
                         </page>
+                        <page string="Tracking Information">
+                            <field name="tracking_info_html" nolabel="1"/>
+                            <t t-call="air_waybill.map"/>
+                        </page>
                         <page string="Financial &amp; Additional Info">
                             <group>
                                 <field name="purchase_amount"/>
                                 <field name="sale_amount"/>
                                 <field name="description"/>
                             </group>
-                            <group>
-                                <field name="financial_line_ids">
-                                    <list editable="bottom">
-                                        <field name="column_1"/>
-                                        <field name="column_2" attrs="{'invisible': [('parent.hide_column_2', '=', True)]}"/>
-
-                                        <field name="column_3"/>
-                                        <field name="column_4"/>
-                                        <field name="column_5"/>
-                                    </list>
-                                </field>
-                            </group>
+                            <field name="financial_line_ids" nolabel="1">
+                                <list editable="bottom">
+                                    <field name="column_1"/>
+                                    <field name="column_2" attrs="{'column_invisible': [('parent.hide_column_2', '=', True)]}"/>
+                                    <field name="column_3"/>
+                                    <field name="column_4"/>
+                                    <field name="column_5"/>
+                                </list>
+                            </field>
                         </page>
                     </notebook>
                 </sheet>
+
             </form>
         </field>
     </record>
-
-    <!-- Assets -->
-
 </odoo>

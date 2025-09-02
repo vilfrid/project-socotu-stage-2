@@ -8,12 +8,15 @@
     """,
     'author': 'Your Name',
     'category': 'Operations',
-    'depends': ['base', 'mail', 'sale', 'web'],  # add any other dependencies
+    'depends': ['base', 'mail', 'sale', 'web'],
     'data': [
         'security/ir.model.access.csv',
         'views/air_waybill_views.xml',
-        'views/menu_views.xml',  # <-- Add this line
+        'views/menu_views.xml',
     ],
+    'external_dependencies': {
+        'python': ['requests'],
+    },
     'assets': {
         'web.assets_backend': [
             'air_waybill/static/src/css/financial_column_toggle.css',
