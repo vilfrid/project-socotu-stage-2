@@ -63,7 +63,6 @@
                         </page>
                         <page string="Tracking Information">
                             <field name="tracking_info_html" nolabel="1"/>
-                            <t t-call="air_waybill.map"/>
                         </page>
                         <page string="Financial &amp; Additional Info">
                             <group>
