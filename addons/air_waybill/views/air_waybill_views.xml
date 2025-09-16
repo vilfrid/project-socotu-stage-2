@@ -25,9 +25,7 @@
         <field name="arch" type="xml">
             <form string="Air Waybill">
                 <header>
-
                     <button name="action_track_awb" string="Track" type="object" class="btn-primary"/>
-
                     <field name="state" widget="statusbar"/>
                 </header>
                 <sheet>
@@ -61,9 +59,13 @@
                                 <field name="handling_info"/>
                             </group>
                         </page>
+
                         <page string="Tracking Information">
                             <field name="tracking_info_html" nolabel="1"/>
+                            <br/>
+                            <field name="geoapify_map_html" nolabel="1"/>
                         </page>
+
                         <page string="Financial &amp; Additional Info">
                             <group>
                                 <field name="purchase_amount"/>
@@ -80,9 +82,9 @@
                                 </list>
                             </field>
                         </page>
+
                     </notebook>
                 </sheet>
-
             </form>
         </field>
     </record>
