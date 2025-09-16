@@ -11,7 +11,6 @@ class AirWaybill(models.Model):
     _description = 'Air Waybill'
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
-    # --- Main fields ---
     name = fields.Char(string='AWB Number', required=True, tracking=True)
     date = fields.Date(string='Date', required=True, tracking=True)
     shipper_id = fields.Many2one('res.partner', string='Shipper', required=True)
@@ -42,28 +41,25 @@ class AirWaybill(models.Model):
         ('cancelled', 'Cancelled')
     ], string='Status', default='draft', tracking=True)
 
-    # Financial lines
     financial_line_ids = fields.One2many('air.waybill.line', 'air_waybill_id', string='Financial Lines')
     hide_column_2 = fields.Boolean(string='Hide Column 2', default=False)
-
-    # Tracking fields
     tracking_info_html = fields.Html(string="Tracking Info", readonly=True, copy=False)
-
-    # Map field
     geoapify_map_html = fields.Html(string="Flight Map", sanitize=False)
 
     @api.depends('length', 'width', 'height')
     def _compute_volume(self):
         for rec in self:
-            rec.volume = rec.length * rec.width * rec.height
+            # Default to 1 if missing
+            l = rec.length if rec.length > 0 else 1.0
+            w = rec.width if rec.width > 0 else 1.0
+            h = rec.height if rec.height > 0 else 1.0
+            rec.volume = l * w * h
 
     def action_track_awb(self):
-        """Calls the AWB tracking API and displays enriched tracking info and map."""
         self.ensure_one()
         awb_number = self.name or "157-03082623"
         api_key = "7561ff0c04mshbd5f260236dd25dp141995jsnd7d70f2e7cef"
         url = f"https://air-cargo-co2-track-and-trace.p.rapidapi.com/track?awb={awb_number}"
-
         headers = {
             "x-rapidapi-key": api_key,
             "x-rapidapi-host": "air-cargo-co2-track-and-trace.p.rapidapi.com"
@@ -77,61 +73,68 @@ class AirWaybill(models.Model):
                 raise UserError("Invalid API response format")
             record = data[0]
 
-            # --- Extract general info ---
-            tracking_number = record.get("awb", "")
-            from_full = f"{record.get('origin', '')}"
-            to_full = f"{record.get('destination', '')}"
-            status = record.get("status", "Unknown")
-            weight = f"{record.get('weight', '')} kg"
-            volume = record.get("volume", "")
-            pieces = record.get("pieces", "")
-            distance = record.get("distance", "")
-            duration = record.get("time", "")
-            carbon = record.get("carbonEmission", "")
+            # --- Auto-fill fields ---
+            self.gross_weight = float(record.get("weight", 0.0) or 0.0)
+            self.chargeable_weight = float(record.get("weight", 0.0) or 0.0)
+            self.pieces = int(record.get("pieces", 0) or 0)
+            self.length = float(record.get("length", 0.0) or 0.0)
+            self.width = float(record.get("width", 0.0) or 0.0)
+            self.height = float(record.get("height", 0.0) or 0.0)
 
-            general_info = f"""
-            <h3>📦 Shipment Overview</h3>
-            <p><b>Tracking (AWB):</b> {tracking_number}</p>
-            <p><b>From (Origin):</b> {from_full}</p>
-            <p><b>To (Destination):</b> {to_full}</p>
-            <p><b>Status:</b> {status}</p>
-            <p><b>Weight:</b> {weight}</p>
-            <p><b>Volume:</b> {volume}</p>
-            <p><b>Pieces:</b> {pieces}</p>
-            <p><b>Total Distance:</b> {distance} km</p>
-            <p><b>Total Flight Time:</b> {duration}</p>
-            <p><b>Total CO₂ Emission:</b> {carbon}</p>
-            <hr/>
-            """
-
-            # --- Flight Legs ---
             events = record.get("events", [])
-            seen_legs = set()
-            flight_legs = []
+            flight_numbers = []
+            first_origin = record.get("origin", "")
+            last_destination = record.get("destination", "")
 
-            html = general_info + "<h4>✈️ Flight Legs (Journey Path)</h4>"
+            flight_legs = []
+            seen_legs = set()
 
             for ev in events:
                 flight = ev.get("flight", {})
                 if flight:
-                    leg_id = (flight.get("number", ""), flight.get("origin", ""), flight.get("destination", ""))
+                    leg_id = (flight.get("number",""), flight.get("origin",""), flight.get("destination",""))
                     if leg_id in seen_legs:
                         continue
                     seen_legs.add(leg_id)
                     flight_legs.append(flight)
-                    html += f"""
-                    <p><b>Flight Number:</b> {flight.get('number','')}</p>
-                    <p>Route: {flight.get('origin','')} → {flight.get('destination','')}</p>
-                    <p>Departure: {flight.get('actualDeparture','')}</p>
-                    <p>Arrival: {flight.get('actualArrival','')}</p>
-                    <p>Duration: {flight.get('duration','')}</p>
-                    <p>Distance: {flight.get('distance','')} km</p>
-                    <p>CO₂ Emission: {flight.get('carbonEmission','')}</p>
-                    <hr/>
-                    """
+                    flight_numbers.append(flight.get("number", ""))
 
-            # --- Key Events Timeline ---
-            html += "<h4>📍 Key Events Timeline</h4><ul>"
+            # Join multiple flights if stopovers
+            self.flight_number = " / ".join(flight_numbers)
+            self.departure = first_origin
+            self.destination = last_destination
+            self.iata_code = record.get("iata_code", "")
+
+            # Map API status to Odoo state
+            status_map = {
+                "DELIVERED": "delivered",
+                "IN_TRANSIT": "in_transit",
+                "CANCELLED": "cancelled",
+                "CONFIRMED": "confirmed",
+                "DRAFT": "draft"
+            }
+            self.state = status_map.get(record.get("status", "draft").upper(), "draft")
+
+            # --- Generate tracking HTML ---
+            html = f"<h3>📦 Shipment Overview</h3>"
+            html += f"<p><b>AWB Number:</b> {self.name}</p>"
+            html += f"<p><b>From:</b> {self.departure}</p>"
+            html += f"<p><b>To:</b> {self.destination}</p>"
+            html += f"<p><b>Status:</b> {self.state.replace('_',' ').title()}</p>"
+            html += f"<p><b>Gross Weight:</b> {self.gross_weight} kg</p>"
+            html += f"<p><b>Chargeable Weight:</b> {self.chargeable_weight} kg</p>"
+            html += f"<p><b>Pieces:</b> {self.pieces}</p>"
+            html += "<h4>✈️ Flight Legs</h4>"
+
+            for flight in flight_legs:
+                html += f"<p><b>Flight:</b> {flight.get('number','')} | {flight.get('origin','')} → {flight.get('destination','')}</p>"
+                html += f"<p>Departure: {flight.get('actualDeparture','')}</p>"
+                html += f"<p>Arrival: {flight.get('actualArrival','')}</p>"
+                html += f"<p>Distance: {flight.get('distance','')} km</p>"
+                html += f"<p>CO₂: {flight.get('carbonEmission','')}</p><hr/>"
+
+            # Key events timeline
+            html += "<h4>📍 Key Events</h4><ul>"
             seen_events = set()
             for ev in events:
                 ev_key = (ev.get("eventDate",""), ev.get("code",""), ev.get("eventLocation",""))
@@ -141,10 +144,9 @@ class AirWaybill(models.Model):
                 html += f"<li>{ev.get('eventDate','')}: {ev.get('code','')} at {ev.get('eventLocation','')}</li>"
             html += "</ul>"
 
-            # Update tracking field
             self.tracking_info_html = html
 
-            # --- Compute map HTML ---
+            # --- Generate map ---
             self._compute_geoapify_map_html(flight_legs)
 
         except Exception as e:
@@ -152,12 +154,10 @@ class AirWaybill(models.Model):
             raise UserError(f"Exception while calling AWB API: {e}")
 
     def _compute_geoapify_map_html(self, flight_legs=None):
-        """Generate Geoapify static map HTML showing all flight legs and events."""
-        key = "5fb8882aff8f46c391af91c98ae8c8e3"  # Replace with your Geoapify API key
+        key = "5fb8882aff8f46c391af91c98ae8c8e3"
         for rec in self:
             coords = []
 
-            # Collect coordinates from flight legs
             if flight_legs:
                 for flight in flight_legs:
                     for coord_str in [flight.get("originCoord"), flight.get("destinationCoord")]:
@@ -166,26 +166,14 @@ class AirWaybill(models.Model):
                             if (lon, lat) not in coords:
                                 coords.append((lon, lat))
 
-            # Collect coordinates from tracking events if needed
-            if len(coords) < 2 and rec.tracking_info_html:
-                import re
-                matches = re.findall(r'eventLocationCoord":\s*"([0-9\.\-]+,[0-9\.\-]+)"', str(rec.tracking_info_html))
-                for coord_str in matches:
-                    lon, lat = map(float, coord_str.split(","))
-                    if (lon, lat) not in coords:
-                        coords.append((lon, lat))
-
             if len(coords) < 2:
                 rec.geoapify_map_html = "<p>No map available</p>"
                 continue
 
-            # Markers
             marker_str = "%7C".join(
                 f"lonlat:{lon},{lat};type:awesome;color:%23ff0000;size:x-large;icon:plane"
                 for lon, lat in coords
             )
-
-            # Polyline
             polyline_str = ",".join(f"{lon},{lat}" for lon, lat in coords)
 
             map_url = (
